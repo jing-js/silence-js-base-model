@@ -60,12 +60,12 @@ class BaseModel {
       }
     }
   }
-  validate() {
+  validate(ignoreUndefined = false) {
     let fields = this.constructor.fields;
     for(let i = 0; i < fields.length; i++) {
       let field = fields[i];
       let val = this[field.name];
-      if (field.require && (util.isUndefined(val) || val === null || val === '')) {
+      if (!ignoreUndefined && field.require && (util.isUndefined(val) || val === null || val === '')) {
         return false;
       }
       if (util.isUndefined(val)) {
