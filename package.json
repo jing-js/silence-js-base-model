@@ -1,6 +1,6 @@
 {
   "name": "silence-js-base-model",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "BaseModel for silence-js",
   "main": "index.js",
   "repository": {

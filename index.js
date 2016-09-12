@@ -2,37 +2,51 @@
 
 const util = require('silence-js-util');
 
+class ModelField {
+  constructor(obj) {
+    this.name = obj.name;
+    this.type = (obj.type || 'string').toLowerCase();
+    this._defaultValue = typeof obj.defaultValue === 'undefined' ? undefined : obj.defaultValue;
+    this.isPrimaryKey = !!obj.primaryKey;
+    this.dbType = (obj.dbType || this.type).toUpperCase();
+    this.autoIncrement = !!obj.autoIncrement;
+    this.autoUpdate = !!obj.autoUpdate;
+    this.require = !!obj.require;
+    this.rules = obj.rules || null;
+  }
+  get defaultValue() {
+    if (typeof this._defaultValue === 'function') {
+      return this._defaultValue();
+    } else {
+      return this._defaultValue;
+    }
+  }
+}
+
 class BaseModel {
   static get fields() {
     return this.__fields;
   }
   static set fields(fields) {
-    fields.forEach(field => {
-      if (!field.type) {
-        field.type = 'string';
-      } else {
-        field.type = field.type.toLowerCase();
-      }
-    });
-    this.__fields = fields;
+    this.__fields = fields.map(f => new ModelField(f));
   }
-  constructor(values, convertType = false) {
+  constructor(values) {
     let fields = this.constructor.fields;
     for(let i = 0; i < fields.length; i++) {
       let field = fields[i];
-      let fieldName = field.name;
-      let val = util.isObject(values) && !util.isUndefined(values[fieldName])
-        ? values[fieldName]
-        : (field.hasOwnProperty('defaultValue') ? field.defaultValue : undefined);
+      let fn = field.name;
+      let val = (typeof values === 'object' && typeof values[fn] !== 'undefined')
+        ? values[fn]
+        : (values === false ? undefined : field.defaultValue);
 
-      if (convertType && typeof val !== 'undefined' && val !== null && typeof val !== field.type) {
+      if (typeof val !== 'undefined' && val !== null && typeof val !== field.type) {
         let cfn = util.converters[field.type];
         if (cfn) {
           val = cfn(val);
         }
       }
-      
-      Object.defineProperty(this, fieldName, {
+
+      Object.defineProperty(this, fn, {
         enumerable: true,
         writable: true,
         configurable: false,
@@ -40,24 +54,22 @@ class BaseModel {
       });
     }
   }
-  assign(values, convertType = false) {
-    if (!util.isObject(values)) {
-      return;
-    }
+  assign(values) {
     let fields = this.constructor.fields;
     for(let i = 0; i < fields.length; i++) {
       let field = fields[i];
-      let fieldName = field.name;
-      if (!util.isUndefined(values[fieldName])) {
-        let val = values[fieldName];
-        if (convertType) {
-          let cfn = util.converters[field.type];
-          if (cfn) {
-            val = cfn(val);
-          }
-        }
-        this[fieldName] = val;
+      let fn = field.name;
+      let val = values[fn];
+      if (typeof val === 'undefined') {
+        continue;
       }
+      if (val !== null && typeof val !== field.type) {
+        let cfn = util.converters[field.type];
+        if (cfn) {
+          val = cfn(val);
+        }
+      }
+      this[fn] = val;
     }
   }
   validate(ignoreUndefined = false) {
@@ -65,10 +77,10 @@ class BaseModel {
     for(let i = 0; i < fields.length; i++) {
       let field = fields[i];
       let val = this[field.name];
-      if (!ignoreUndefined && field.require && (util.isUndefined(val) || val === null || val === '')) {
+      if (!ignoreUndefined && field.require && (typeof val === 'undefined' || val === null || val === '')) {
         return false;
       }
-      if (util.isUndefined(val)) {
+      if (typeof val === 'undefined') {
         continue;
       }
       if (!field.rules) {
@@ -79,11 +91,11 @@ class BaseModel {
       for(let k in rules) {
         let v = rules[k];
         let fn = v;
-        if (!util.isFunction(v)) {
+        if (typeof v !== 'function') {
           fn = util.validators[k];
         }
-        v = Array.isArray(v) ? v : [v];
-        if (!fn.call(this, val, ...v)) {
+        let pass = Array.isArray(v) ? fn.call(this, val, ...v) : fn.call(this, val, v);
+        if (!pass) {
           return false;
         }
       }
@@ -91,5 +103,7 @@ class BaseModel {
     return true;
   }
 }
+
+BaseModel.ModelField = ModelField;
 
 module.exports = BaseModel;
