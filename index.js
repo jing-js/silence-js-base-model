@@ -13,6 +13,8 @@ class ModelField {
     this.autoUpdate = !!obj.autoUpdate;
     this.require = !!obj.require;
     this.rules = obj.rules || null;
+    this.index = !!obj.index;
+    this.unique = !!obj.unique;
   }
   get defaultValue() {
     if (typeof this._defaultValue === 'function') {
