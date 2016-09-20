@@ -17,6 +17,9 @@ function create(proto) {
     } else if (!field.type) {
       throw new Error(`Field ${field.name} must have 'type', please check fields of ${this.name}`);
     }
+    if (['constructor'].indexOf(field.name) >= 0) {
+      throw new Error(`Field name can not be ${field.name}, it's reserved words`);
+    }
     fields[i] = field;
   }
 

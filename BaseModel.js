@@ -4,9 +4,6 @@ class BaseModel {
   static get logger() {
     return BaseModel.__logger;
   }
-  get logger() {
-    return BaseModel.__logger;
-  }
   assign(values) {
     let fields = this.constructor.fields;
     for(let i = 0; i < fields.length; i++) {
