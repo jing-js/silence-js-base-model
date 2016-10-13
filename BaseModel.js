@@ -32,15 +32,23 @@ class BaseModel {
       if (!field.rules) {
         continue;
       }
-      
+
       let rules = field.rules;
-      for(let k in rules) {
-        let v = rules[k];
-        let fn = v;
-        if (typeof v !== 'function') {
-          fn = util.validators[k];
+      for(let k = 0; k < rules.length; k++) {
+        let r = rules[k];
+        let pass = false;
+        if (r instanceOf RegExp) {
+          pass = r.test(val);
+        } else if (typeof r === 'function') {
+          pass = r.call(this, val)
+        } else if (typeof r === 'string') {
+          pass = util.validators[k].call(this, val);
+        } else {
+          let t = r.type;
+          let v = r.argv;
+          let fn = util.validators[r.type];
+          pass = Array.isArray(v) ? fn.call(this, val, ...v) : fn.call(this, val, v);
         }
-        let pass = Array.isArray(v) ? fn.call(this, val, ...v) : fn.call(this, val, v);
         if (!pass) {
           return false;
         }
