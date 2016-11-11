@@ -1,5 +1,7 @@
 const BaseModel = require('./BaseModel');
 const ModelField = require('./ModelField');
+const createFieldsConstructorCode = require('./createFieldsConstructorCode');
+const { converters } = require('silence-js-util');
 
 function create(proto) {
   let name = proto.name;
@@ -24,16 +26,11 @@ function create(proto) {
   }
 
   let funcStr = `
+
 class ${name} extends BaseModel {
-  constructor(values, assignDefaultValue = true) {
+  constructor(values, direct = false) {
     super();
-    const fields = this.constructor.fields;
-    ${fields.map((field, idx) => {
-      return`
-    this.${field.name} = values && values.hasOwnProperty('${field.name}') 
-        ? values.${field.name} : (assignDefaultValue ? fields[${idx}].defaultValue : undefined);
-  `;    
-    }).join('\n')}
+${createFieldsConstructorCode(fields)}
   }
 }
 
@@ -43,10 +40,12 @@ return ${name};
 
 `;
 
+console.log(funcStr);
 
-  return (new Function('BaseModel', 'fields', funcStr))(
+  return (new Function('BaseModel', 'fields', 'CONVERTERS', funcStr))(
     BaseModel,
-    fields
+    fields,
+    converters
   );
 }
 

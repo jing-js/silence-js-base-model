@@ -9,5 +9,6 @@ module.exports = {
   },
   isModel(ModelClass) {
     return Object.getPrototypeOf(ModelClass) === BaseModel;
-  }
+  },
+  createFieldsConstructorCode: require('./createFieldsConstructorCode')
 };

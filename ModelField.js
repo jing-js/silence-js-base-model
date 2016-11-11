@@ -11,6 +11,10 @@ class ModelField {
     this.rules = obj.rules || null;
     this.isIndex = !!obj.index;
     this.isUnique = !!obj.unique;
+    this.index = obj.index;
+    this.isShard = !!obj.shard;
+    this.shardUnique = typeof obj.shard === 'object' ? (!!obj.shard.unique) : this.isUnique;
+    this.convert = typeof obj.convert === 'function' ? obj.convert : (obj.convert || null)
   }
   get defaultValue() {
     if (typeof this._defaultValue === 'function') {

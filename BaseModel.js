@@ -11,7 +11,15 @@ class BaseModel {
       if (!values.hasOwnProperty(field.name)) {
         continue;
       }
-      this[field.name] = values[field.name];
+      let val = values[field.name];
+      if (field.convert) {
+        if (typeof field.convert === 'function') {
+          val = field.convert(val);
+        } else if (util.converters.hasOwnProperty(field.convert)) {
+          val = util.converters[field.convert](val);
+        }
+      }
+      this[field.name] = val;
     }
   }
   validate(ignoreUndefined = false) {
@@ -26,7 +34,7 @@ class BaseModel {
       if (tp === 'undefined') {
         continue;
       }
-      if (tp !== field.type) {
+      if (field.type !== 'any' && tp !== field.type) {
         return false;
       }
       if (!field.rules) {
@@ -37,7 +45,7 @@ class BaseModel {
       for(let k = 0; k < rules.length; k++) {
         let r = rules[k];
         let pass = false;
-        if (r instanceOf RegExp) {
+        if (r instanceof RegExp) {
           pass = r.test(val);
         } else if (typeof r === 'function') {
           pass = r.call(this, val)
