@@ -1,5 +1,5 @@
 module.exports = function createFieldsConstructorCode(fields) {
-  return `    let _isObj = typeof values === 'object' && values !== null;
+  return `    let isObj = typeof values === 'object' && values !== null;
 ${fields.map((field, idx) => {
     let _default = 'undefined';
     if (typeof field._defaultValue === 'function') {
@@ -13,7 +13,7 @@ ${fields.map((field, idx) => {
     } else if (typeof field.convert === 'string') {
       _value = `(direct ? values.${field.name} : CONVERTERS.${field.convert}(values.${field.name}))`;
     }
-    let _result = !field._defaultValue && !field.convert ? `isObj ? ${_value} : undefined` : `_isObj && values.hasOwnProperty('${field.name}') ? ${_value} : ${_default}`;
+    let _result = !field._defaultValue && !field.convert ? `isObj ? ${_value} : undefined` : `isObj && values.hasOwnProperty('${field.name}') ? ${_value} : ${_default}`;
     return `    this.${field.name} = ${_result};`;
   }).join('\n')}`;
 }

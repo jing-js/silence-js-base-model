@@ -50,12 +50,16 @@ class BaseModel {
         } else if (typeof r === 'function') {
           pass = r.call(this, val)
         } else if (typeof r === 'string') {
-          pass = util.validators[k].call(this, val);
+          pass = util.validators[r].call(this, val);
         } else {
-          let t = r.type;
+          let t = r.name;
           let v = r.argv;
-          let fn = util.validators[r.type];
-          pass = Array.isArray(v) ? fn.call(this, val, ...v) : fn.call(this, val, v);
+          let fn = util.validators[t];
+          if (!fn) {
+            pass = false;
+          } else {
+            pass = Array.isArray(v) ? fn.call(this, val, ...v) : fn.call(this, val, v);
+          }
         }
         if (!pass) {
           return false;

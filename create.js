@@ -39,9 +39,7 @@ ${name}.fields = fields;
 return ${name};
 
 `;
-
-console.log(funcStr);
-
+  
   return (new Function('BaseModel', 'fields', 'CONVERTERS', funcStr))(
     BaseModel,
     fields,
