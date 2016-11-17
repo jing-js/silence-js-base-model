@@ -1,7 +1,15 @@
-const BaseModel = require('./BaseModel');
 const ModelField = require('./ModelField');
-const createFieldsConstructorCode = require('./createFieldsConstructorCode');
-const { converters } = require('silence-js-util');
+const {
+  createFieldsConstructorCode,
+  createValidateFunctionCode,
+  createFieldsPropertiesCode,
+  createDeclareCode
+} = require('./helper');
+const { converters, validators } = require('silence-js-util');
+
+const __store = {
+  logger: null
+}
 
 function create(proto) {
   let name = proto.name;
@@ -27,24 +35,32 @@ function create(proto) {
 
   let funcStr = `
 
-class ${name} extends BaseModel {
-  constructor(values, direct = false) {
-    super();
-${createFieldsConstructorCode(fields)}
-  }
-}
+${createDeclareCode(fields)}
 
-${name}.fields = fields;
+class ${name} {
+  static get logger() {
+    return STORE.logger;
+  }
+${createFieldsConstructorCode(fields)}
+${createValidateFunctionCode(fields)}
+${createFieldsPropertiesCode(fields)}
+}
 
 return ${name};
 
 `;
-  
-  return (new Function('BaseModel', 'fields', 'CONVERTERS', funcStr))(
-    BaseModel,
+
+  console.log(funcStr.split('\n').map((line, idx) => `${idx + 1}:\t ${line}`).join('\n'));
+
+  return (new Function('FIELDS', 'CONVERTERS', 'VALIDATORS', 'STORE', funcStr))(
     fields,
-    converters
+    converters,
+    validators,
+    __store
   );
 }
 
-module.exports = create;
+module.exports = {
+  create,
+  store: __store
+};

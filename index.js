@@ -1,14 +1,10 @@
-const BaseModel = require('./BaseModel');
+const { create, store } = require('./create');
 
 module.exports = {
-  BaseModel,
   ModelField: require('./ModelField'),
-  create: require('./create'),
+  create,
   __init(logger) {
-    BaseModel.__logger = logger;
+    store.logger = logger;
   },
-  isModel(ModelClass) {
-    return Object.getPrototypeOf(ModelClass) === BaseModel;
-  },
-  createFieldsConstructorCode: require('./createFieldsConstructorCode')
+  createHelper: require('./helper')
 };
