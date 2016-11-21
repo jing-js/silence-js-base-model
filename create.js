@@ -50,7 +50,7 @@ return ${name};
 
 `;
 
-  console.log(funcStr.split('\n').map((line, idx) => `${idx + 1}:\t ${line}`).join('\n'));
+  // console.log(funcStr.split('\n').map((line, idx) => `${idx + 1}:\t ${line}`).join('\n'));
 
   return (new Function('FIELDS', 'CONVERTERS', 'VALIDATORS', 'STORE', funcStr))(
     fields,

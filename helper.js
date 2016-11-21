@@ -54,13 +54,18 @@ function createValidateFunctionCode(fields) {
     return `
     val = this.${PREFIX}${field.name};${field.isRequired ? `
     if (!ignoreUndefined && (val === undefined || val === null || val === '')) {
+      this.constructor.logger.debug('${field.name} is invalid, require not match');
       return false;
     }` : ''}
     if (val !== undefined) {${field.type !== 'any' ? `
-      if (typeof val !== '${field.type}') return false;` : ''}${field.rules ? `
+      if (typeof val !== '${field.type}') {
+        this.constructor.logger.debug('${field.name} is invalid, type is not ${field.type}');
+        return false;
+      }` : ''}${field.rules ? `
       let rules = rs.${PREFIX}${field.name};
       for (let i = 0; i < rules.length; i++) {
         if (!rules[i](val)) {
+          this.constructor.logger.debug('${field.name} is invalid, rule not match');
           return false;
         }
       }` : ''}
