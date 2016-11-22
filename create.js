@@ -37,9 +37,11 @@ function create(proto) {
 
 ${createDeclareCode(fields)}
 
+let logger = STORE.logger;
+
 class ${name} {
   static get logger() {
-    return STORE.logger;
+    return logger;
   }
 ${createFieldsConstructorCode(fields)}
 ${createValidateFunctionCode(fields)}
