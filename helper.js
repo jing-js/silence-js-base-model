@@ -8,7 +8,7 @@ function createFieldsConstructorCode(fields) {
     let isObj = typeof values === 'object' && values !== null;${fields.map((field, idx) => {
     let _default = 'undefined';
     if (typeof field._defaultValue === 'function') {
-      _default = `(direct ? undefined : dv.${PREFIX}${field.name}()`;
+      _default = `(direct ? undefined : dv.${PREFIX}${field.name}())`;
     } else if (typeof field._defaultValue !== 'undefined') {
       _default = `(direct ? undefined : ${JSON.stringify(field._defaultValue)})`;
     }
