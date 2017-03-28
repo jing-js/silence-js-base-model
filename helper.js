@@ -5,7 +5,9 @@ const PREFIX = '____';
 function createFieldsConstructorCode(fields) {
   return `
   constructor(values, direct = false) {
-    let isObj = typeof values === 'object' && values !== null;${fields.map((field, idx) => {
+    let isObj = typeof values === 'object' && values !== null;
+    let __proto__ = isObj && typeof values.constructor === 'function' && values.constructor !== Object.prototype.constructor ? values.constructor.prototype : values;
+${fields.map((field, idx) => {
     let _default = 'undefined';
     if (typeof field._defaultValue === 'function') {
       _default = `(direct ? undefined : dv.${PREFIX}${field.name}())`;
@@ -20,7 +22,7 @@ function createFieldsConstructorCode(fields) {
     } else if (field.type !== 'any' && converters.hasOwnProperty(field.type)) {
       _value = `(direct || typeof values.${field.name} === '${field.type}' ? values.${field.name} : fc.${PREFIX}${field.name}(values.${field.name}))`
     }
-    let _result = !field._defaultValue && !_value ? `isObj ? values.${field.name} : undefined` : `isObj && values.hasOwnProperty('${field.name}') ? ${_value ? _value : `values.${field.name}`} : ${_default}`;
+    let _result = !field._defaultValue && !_value ? `isObj ? values.${field.name} : undefined` : `isObj && __proto__.hasOwnProperty('${field.name}') ? ${_value ? _value : `values.${field.name}`} : ${_default}`;
     return `
     this.${PREFIX}${field.name} = ${_result};`;
   }).join('')}

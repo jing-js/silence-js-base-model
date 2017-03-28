@@ -15,5 +15,8 @@
   },
   "homepage": "https://github.com/jing-js/silence-js-base-model#readme",
   "author": "Yuhang Ge <abeyuhang@gmail.com>",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "silence-js-util": "^1.0.3"
+  }
 }
